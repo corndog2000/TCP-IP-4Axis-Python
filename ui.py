@@ -8,6 +8,7 @@ from dobot_api import *
 import json
 from files.alarm_controller import alarm_controller_list
 from files.alarm_servo import alarm_servo_list
+import logging
 
 LABEL_JOINT = [["J1-", "J2-", "J3-", "J4-"],
                ["J1:", "J2:", "J3:", "J4:"],
@@ -31,6 +32,7 @@ LABEL_ROBOT_MODE = {
     11:	"ROBOT_MODE_JOG"
 }
 
+ROBOT_POSITION = []
 
 class RobotUI(object):
 
@@ -50,6 +52,10 @@ class RobotUI(object):
 
         # all entry
         self.entry_dict = {}
+
+        #logging.basicConfig(filename='example.log', level=logging.DEBUG)
+        logging.basicConfig(filename='positions.log', format='"%(asctime)s", %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        #logging.root.handlers[0].setFormatter(CsvFormatter())
 
         # Robot Connect
         self.frame_robot = LabelFrame(self.root, text="Robot Connect",
@@ -157,6 +163,9 @@ class RobotUI(object):
                         rely=0.05, x=410, command=self.movj)
         self.set_button(master=self.frame_move, text="MovL",
                         rely=0.05, x=500, command=self.movl)
+        
+        self.set_button(master=self.frame_move, text="Save Position to Log",
+                        rely=0.05, x=600, command=self.logpoint)
 
         self.set_move(text="J1:", label_value=10,
                       default_value="0", entry_value=40, rely=0.5, master=self.frame_move)
@@ -364,16 +373,22 @@ class RobotUI(object):
         self.client_move.MovL(float(self.entry_dict["X:"].get()), float(self.entry_dict["Y:"].get()), float(self.entry_dict["Z:"].get()),
                               float(self.entry_dict["R:"].get()))
 
+    def logpoint(self):
+        #logging.debug('This message should go to the log file')
+        #logging.info('So should this')
+        #logging.warning(str(float(self.entry_dict["X:"].get())) + ", " + str(float(self.entry_dict["Y:"].get())) + ", " + str(float(self.entry_dict["Z:"].get())) + ", " + str(float(self.entry_dict["R:"].get())))
+        logging.warning('"' + str(ROBOT_POSITION[0][0]).strip("][ ") + '", "' + str(ROBOT_POSITION[0][1]).strip("][ ") +'", "'+ str(ROBOT_POSITION[0][2]).strip("][ ")+'", "'+str(ROBOT_POSITION[0][3]).strip("][ ") +'", "(' + str(ROBOT_POSITION[0][0]).strip("][ ") +', '+str(ROBOT_POSITION[0][1]).strip("][ ") + ', '+str(ROBOT_POSITION[0][2]).strip("][ ") + ', '+str(ROBOT_POSITION[0][3]).strip("][ ") + ')"')
+
     def joint_movj(self):
         self.client_move.JointMovJ(float(self.entry_dict["J1:"].get()), float(self.entry_dict["J2:"].get()), float(self.entry_dict["J3:"].get()),
                                    float(self.entry_dict["J4:"].get()))
 
     def confirm_do(self):
         if self.combo_status.get() == "On":
-            print("高电平")
+            print("high level")
             self.client_dash.DO(int(self.entry_index.get()), 1)
         else:
-            print("低电平")
+            print("low level")
             self.client_dash.DO(int(self.entry_index.get()), 0)
 
     def set_feed(self, text_list, x1, x2, x3, x4):
@@ -442,12 +457,14 @@ class RobotUI(object):
                 # Refresh coordinate points
                 self.set_feed_joint(LABEL_JOINT, a["q_actual"])
                 self.set_feed_joint(LABEL_COORD, a["tool_vector_actual"])
+                global ROBOT_POSITION
+                ROBOT_POSITION = a["tool_vector_actual"]
 
                 # check alarms
                 if a["robot_mode"] == 9:
                     self.display_error_info()
 
-            time.sleep(0.005)
+            #time.sleep(0.005)
 
     def display_error_info(self):
         error_list = self.client_dash.GetErrorID().split("{")[1].split("}")[0]
