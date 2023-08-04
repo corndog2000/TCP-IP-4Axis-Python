@@ -1,5 +1,7 @@
 # Added the ability to log current robot position to a log file by clicking a button on the dashboard.
 
+## You must set the robot to TCP/IP secondary operation mode from DobotStudio Pro.
+
 Chinese version of the README -> please [click here](./README.md)
 
 # Readme
