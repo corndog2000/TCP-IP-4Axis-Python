@@ -377,7 +377,7 @@ class RobotUI(object):
         #logging.debug('This message should go to the log file')
         #logging.info('So should this')
         #logging.warning(str(float(self.entry_dict["X:"].get())) + ", " + str(float(self.entry_dict["Y:"].get())) + ", " + str(float(self.entry_dict["Z:"].get())) + ", " + str(float(self.entry_dict["R:"].get())))
-        logging.warning('"' + str(ROBOT_POSITION[0][0]).strip("][ ") + '", "' + str(ROBOT_POSITION[0][1]).strip("][ ") +'", "'+ str(ROBOT_POSITION[0][2]).strip("][ ")+'", "'+str(ROBOT_POSITION[0][3]).strip("][ ") +'", "(' + str(ROBOT_POSITION[0][0]).strip("][ ") +', '+str(ROBOT_POSITION[0][1]).strip("][ ") + ', '+str(ROBOT_POSITION[0][2]).strip("][ ") + ', '+str(ROBOT_POSITION[0][3]).strip("][ ") + ')"')
+        logging.warning('"' + str(round(ROBOT_POSITION[0][0], 4)).strip("][ ") + '", "' + str(round(ROBOT_POSITION[0][1], 4)).strip("][ ") +'", "'+ str(round(ROBOT_POSITION[0][2], 4)).strip("][ ")+'", "'+str(round(ROBOT_POSITION[0][3], 4)).strip("][ ") +'", "(' + str(round(ROBOT_POSITION[0][0], 4)).strip("][ ") +', '+str(round(ROBOT_POSITION[0][1], 4)).strip("][ ") + ', '+str(round(ROBOT_POSITION[0][2], 4)).strip("][ ") + ', '+str(round(ROBOT_POSITION[0][3], 4)).strip("][ ") + ')"')
 
     def joint_movj(self):
         self.client_move.JointMovJ(float(self.entry_dict["J1:"].get()), float(self.entry_dict["J2:"].get()), float(self.entry_dict["J3:"].get()),
