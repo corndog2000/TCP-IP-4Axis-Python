@@ -1,3 +1,5 @@
+# Added the ability to log current robot position to a log file by clicking a button on the dashboard.
+
 English version of the README -> please [click here](./README-EN.md)
 
 # 先读我
