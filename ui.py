@@ -204,6 +204,7 @@ class RobotUI(object):
         self.set_feed(LABEL_JOINT, 9, 52, 74, 117)
         self.set_feed(LABEL_COORD, 165, 209, 231, 272)
         self.setup_keyboard(LABEL_COORD)
+        #self.set_logpoint_keyboard
 
         # Digitial I/O
         self.set_label(self.frame_feed, "Digital Inputs:", rely=0.8, x=11)
@@ -310,6 +311,9 @@ class RobotUI(object):
         self.root.bind(keyPressArg, lambda event: self.move_jog(text=text))
         self.root.bind(keyReleaseArg, self.move_stop)
         print("Bound " + str(key) + " to " + str(text))
+
+    def set_logpoint_keyboard(self):
+        self.root.bind("<KeyPress-e>", self.logpoint)
 
     def set_label(self, master, text, rely, x):
         self.label = Label(master, text=text)
