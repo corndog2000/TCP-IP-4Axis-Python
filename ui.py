@@ -199,10 +199,11 @@ class RobotUI(object):
         self.label_robot_mode = self.set_label(
             self.frame_feed, "", rely=0.1, x=95)
 
-        # 点动及获取坐标
+        # Jog and get coordinates
         self.label_feed_dict = {}
         self.set_feed(LABEL_JOINT, 9, 52, 74, 117)
         self.set_feed(LABEL_COORD, 165, 209, 231, 272)
+        self.setup_keyboard(LABEL_COORD)
 
         # Digitial I/O
         self.set_label(self.frame_feed, "Digital Inputs:", rely=0.8, x=11)
@@ -241,6 +242,8 @@ class RobotUI(object):
         self.alarm_controller_dict = self.convert_dict(alarm_controller_list)
         self.alarm_servo_dict = self.convert_dict(alarm_servo_list)
 
+        #self.root.bind("Z", )
+
     def convert_dict(self, alarm_list):
         alarm_dict = {}
         for i in alarm_list:
@@ -248,7 +251,7 @@ class RobotUI(object):
         return alarm_dict
 
     def read_file(self, path):
-        # 读json文件耗时大，选择维护两个变量alarm_controller_list alarm_servo_list
+        # It takes a lot of time to read the json file, choose to maintain two variables alarm_controller_list alarm_servo_list
         # self.read_file("files/alarm_controller.json")
         with open(path, "r", encoding="utf8") as fp:
             json_data = json.load(fp)
@@ -300,6 +303,13 @@ class RobotUI(object):
             self.button["state"] = "disable"
             self.button_list.append(self.button)
         return self.button
+    
+    def set_keyboard_bind(self, text, key):
+        keyPressArg = "<KeyPress-" + str(key) + ">"
+        keyReleaseArg = "<KeyRelease-" + str(key) + ">"
+        self.root.bind(keyPressArg, lambda event: self.move_jog(text=text))
+        self.root.bind(keyReleaseArg, self.move_stop)
+        print("Bound " + str(key) + " to " + str(text))
 
     def set_label(self, master, text, rely, x):
         self.label = Label(master, text=text)
@@ -308,7 +318,7 @@ class RobotUI(object):
 
     def connect_port(self):
         if self.global_state["connect"]:
-            print("断开成功")
+            print("successfully disconnected")
             self.client_dash.close()
             self.client_feed.close()
             self.client_move.close()
@@ -321,7 +331,7 @@ class RobotUI(object):
             self.button_connect["text"] = "Connect"
         else:
             try:
-                print("连接成功")
+                print("connection succeeded")
                 self.client_dash = DobotApiDashboard(
                     self.entry_ip.get(), int(self.entry_dash.get()), self.text_log)
                 self.client_move = DobotApiMove(
@@ -424,10 +434,22 @@ class RobotUI(object):
         self.set_button_bind(
             self.frame_feed, text_list[2][3], rely=0.5, x=x4, command=lambda: self.move_jog(text_list[2][0]))
 
+    def setup_keyboard(self, text_list):
+        self.set_keyboard_bind(text_list[0][0], "q")
+        self.set_keyboard_bind(text_list[2][0], "w")
+        self.set_keyboard_bind(text_list[0][1], "a")
+        self.set_keyboard_bind(text_list[2][1], "s")
+        self.set_keyboard_bind(text_list[0][2], "z")
+        self.set_keyboard_bind(text_list[2][2], "x")
+        self.set_keyboard_bind(text_list[0][3], "1")
+        self.set_keyboard_bind(text_list[2][3], "2")
+        text_label = Label(self.root, text="Keyboard shortcuts (Action 'Keyboard button'): X-  'Q', X+  'E'  Y-  'A', Y+  'S'  Z-  'Z', Z+  'X'  R-  '1', R+  '2'", font=("Arial", 10))
+        text_label.place(x=30, y=80)
+
     def feed_back(self):
         hasRead = 0
         while True:
-            print("self.global_state(connect)", self.global_state["connect"])
+            #print("self.global_state(connect)", self.global_state["connect"])
             if not self.global_state["connect"]:
                 break
             data = bytes()
@@ -439,8 +461,8 @@ class RobotUI(object):
             hasRead = 0
 
             a = np.frombuffer(data, dtype=MyType)
-            print("robot_mode:", a["robot_mode"][0])
-            print("test_value:", hex((a['test_value'][0])))
+            #print("robot_mode:", a["robot_mode"][0])
+            #print("test_value:", hex((a['test_value'][0])))
             if hex((a['test_value'][0])) == '0x123456789abcdef':
                 # print('tool_vector_actual',
                 #       np.around(a['tool_vector_actual'], decimals=4))
