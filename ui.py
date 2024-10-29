@@ -63,7 +63,7 @@ class RobotUI(object):
 
         self.label_ip = Label(self.frame_robot, text="IP Address:")
         self.label_ip.place(rely=0.2, x=10)
-        ip_port = StringVar(self.root, value="192.168.1.6")
+        ip_port = StringVar(self.root, value="169.254.2.6")
         self.entry_ip = Entry(self.frame_robot, width=12, textvariable=ip_port)
         self.entry_ip.place(rely=0.2, x=90)
 
@@ -146,38 +146,55 @@ class RobotUI(object):
         self.set_button(self.frame_dashboard, "Confirm",
                         rely=0.55, x=350, command=self.confirm_do)
 
-        # Move Function
+                # Move Function
         self.frame_move = LabelFrame(self.root, text="Move Function", labelanchor="nw",
-                                     bg="#FFFFFF", width=870, pady=10, height=130, border=2)
+                                     bg="#FFFFFF", width=870, pady=10, height=160, border=2)
 
+        # Add coordinate paste section
+        self.label_paste = Label(self.frame_move, text="Paste Coordinates:")
+        self.label_paste.place(rely=0.05, x=10)
+        
+        # Add text box for coordinate input
+        self.coord_input = Entry(self.frame_move, width=40)
+        self.coord_input.place(rely=0.05, x=120)
+        
+        # Add parse button - moved to align with coordinate input
+        self.parse_button = Button(self.frame_move, text="Parse Coordinates", 
+                                 padx=5, command=self.parse_coordinates)
+        self.parse_button.place(rely=0.05, x=480)
+
+        # Coordinate controls - adjusted layout
         self.set_move(text="X:", label_value=10,
-                      default_value="600", entry_value=40, rely=0.1, master=self.frame_move)
+                      default_value="600", entry_value=40, rely=0.3, master=self.frame_move)
         self.set_move(text="Y:", label_value=110,
-                      default_value="-260", entry_value=140, rely=0.1, master=self.frame_move)
+                      default_value="-260", entry_value=140, rely=0.3, master=self.frame_move)
         self.set_move(text="Z:", label_value=210,
-                      default_value="380", entry_value=240, rely=0.1, master=self.frame_move)
+                      default_value="380", entry_value=240, rely=0.3, master=self.frame_move)
         self.set_move(text="R:", label_value=310,
-                      default_value="170", entry_value=340, rely=0.1, master=self.frame_move)
+                      default_value="170", entry_value=340, rely=0.3, master=self.frame_move)
 
+        # Movement buttons - adjusted positions
         self.set_button(master=self.frame_move, text="MovJ",
-                        rely=0.05, x=410, command=self.movj)
+                        rely=0.3, x=410, command=self.movj)
         self.set_button(master=self.frame_move, text="MovL",
-                        rely=0.05, x=500, command=self.movl)
+                        rely=0.3, x=480, command=self.movl)
         
         self.set_button(master=self.frame_move, text="Save Position to Log",
-                        rely=0.05, x=600, command=self.logpoint)
+                        rely=0.3, x=600, command=self.logpoint)
 
+        # Joint controls - adjusted layout
         self.set_move(text="J1:", label_value=10,
-                      default_value="0", entry_value=40, rely=0.5, master=self.frame_move)
+                      default_value="0", entry_value=40, rely=0.65, master=self.frame_move)
         self.set_move(text="J2:", label_value=110,
-                      default_value="-20", entry_value=140, rely=0.5, master=self.frame_move)
+                      default_value="-20", entry_value=140, rely=0.65, master=self.frame_move)
         self.set_move(text="J3:", label_value=210,
-                      default_value="-80", entry_value=240, rely=0.5, master=self.frame_move)
+                      default_value="-80", entry_value=240, rely=0.65, master=self.frame_move)
         self.set_move(text="J4:", label_value=310,
-                      default_value="30", entry_value=340, rely=0.5, master=self.frame_move)
+                      default_value="30", entry_value=340, rely=0.65, master=self.frame_move)
 
         self.set_button(master=self.frame_move,
-                        text="JointMovJ", rely=0.45, x=410, command=self.joint_movj)
+                        text="JointMovJ", rely=0.65, x=410, command=self.joint_movj)
+
 
         self.frame_feed_log = Frame(
             self.root, bg="#FFFFFF", width=870, pady=10, height=400, border=2)
@@ -244,6 +261,42 @@ class RobotUI(object):
         self.alarm_servo_dict = self.convert_dict(alarm_servo_list)
 
         #self.root.bind("Z", )
+
+    def parse_coordinates(self):
+        """Parse coordinates from the input text box and update the coordinate fields"""
+        try:
+            # Get the text from the input box
+            coord_text = self.coord_input.get().strip()
+            
+            # Remove brackets if present
+            coord_text = coord_text.strip('[]')
+            
+            # Split the string into individual values and convert to float
+            coords = [float(x.strip()) for x in coord_text.split(',')]
+            
+            # Ensure we have exactly 4 values
+            if len(coords) != 4:
+                messagebox.showerror("Error", "Please provide exactly 4 values (X, Y, Z, R)")
+                return
+            
+            # Update the coordinate entry fields
+            self.entry_dict["X:"].delete(0, END)
+            self.entry_dict["X:"].insert(0, str(coords[0]))
+            
+            self.entry_dict["Y:"].delete(0, END)
+            self.entry_dict["Y:"].insert(0, str(coords[1]))
+            
+            self.entry_dict["Z:"].delete(0, END)
+            self.entry_dict["Z:"].insert(0, str(coords[2]))
+            
+            self.entry_dict["R:"].delete(0, END)
+            self.entry_dict["R:"].insert(0, str(coords[3]))
+            
+        except ValueError as e:
+            messagebox.showerror("Error", "Invalid coordinate format. Please use numbers separated by commas.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+
 
     def convert_dict(self, alarm_list):
         alarm_dict = {}
@@ -477,7 +530,7 @@ class RobotUI(object):
                 self.label_robot_mode["text"] = LABEL_ROBOT_MODE[a["robot_mode"][0]]
                 self.label_di_input["text"] = bin(a["digital_input_bits"][0])[
                     2:].rjust(64, '0')
-                self.label_di_output["text"] = bin(a["digital_outputs"][0])[
+                self.label_di_output["text"] = bin(a["digital_output_bits"][0])[
                     2:].rjust(64, '0')
 
                 # Refresh coordinate points
